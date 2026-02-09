@@ -33,7 +33,25 @@ services:
       dockerfile: docker/Dockerfile.api
     ports:
       - "8000:8000"
-    env_file: .env
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Service-to-service URLs (override any .env values for compose networking)
+      DATABASE_URL: postgresql+asyncpg://agentops:agentops@postgres:5432/agentops
+      DATABASE_URL_SYNC: postgresql://agentops:agentops@postgres:5432/agentops
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      API_ENV: development
+      API_HOST: 0.0.0.0
+      API_PORT: "8000"
+      SECRET_KEY: ${SECRET_KEY:-local-dev-secret-key}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      MAX_COST_PER_RUN_USD: "5.00"
+      MAX_TOKENS_PER_RUN: "100000"
+      RATE_LIMIT_REQUESTS_PER_MINUTE: "60"
     depends_on:
       postgres:
         condition: service_healthy
@@ -49,7 +67,20 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.worker
-    env_file: .env
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+asyncpg://agentops:agentops@postgres:5432/agentops
+      DATABASE_URL_SYNC: postgresql://agentops:agentops@postgres:5432/agentops
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      API_ENV: development
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      MAX_COST_PER_RUN_USD: "5.00"
+      MAX_TOKENS_PER_RUN: "100000"
     depends_on:
       postgres:
         condition: service_healthy

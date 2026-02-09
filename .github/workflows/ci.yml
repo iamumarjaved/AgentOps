@@ -85,10 +85,12 @@ jobs:
       - name: Run tests
         run: uv run pytest tests/ -v --tb=short --cov=src/agentops
         env:
+          PYTHONPATH: src
           DATABASE_URL: postgresql+asyncpg://agentops:agentops@localhost:5432/agentops_test
           DATABASE_URL_SYNC: postgresql://agentops:agentops@localhost:5432/agentops_test
           REDIS_URL: redis://localhost:6379/0
           API_ENV: testing
+          OPENAI_API_KEY: test-key
 
   frontend-lint:
     runs-on: ubuntu-latest
