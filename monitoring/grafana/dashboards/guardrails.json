@@ -1,0 +1,60 @@
+{
+  "dashboard": {
+    "title": "AgentOps - Guardrails",
+    "uid": "agentops-guardrails",
+    "panels": [
+      {
+        "title": "Total Violations",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+        "targets": [
+          { "expr": "sum(agentops_guardrail_violations_total)" }
+        ]
+      },
+      {
+        "title": "Violations by Type",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 8, "x": 6, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum by (guard_type) (agentops_guardrail_violations_total)",
+            "legendFormat": "{{guard_type}}"
+          }
+        ]
+      },
+      {
+        "title": "Violations by Action",
+        "type": "bargauge",
+        "gridPos": { "h": 8, "w": 10, "x": 14, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum by (action) (agentops_guardrail_violations_total)",
+            "legendFormat": "{{action}}"
+          }
+        ]
+      },
+      {
+        "title": "Violation Rate",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(agentops_guardrail_violations_total[5m])",
+            "legendFormat": "{{guard_type}} - {{action}}"
+          }
+        ]
+      },
+      {
+        "title": "Guardrail Check Latency",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(agentops_guardrail_check_latency_seconds_bucket[5m]))",
+            "legendFormat": "{{guard_type}} p95"
+          }
+        ]
+      }
+    ]
+  }
+}

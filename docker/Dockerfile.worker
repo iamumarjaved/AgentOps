@@ -1,0 +1,16 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies first for layer caching
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY src/ src/
+
+# Set Python path so imports resolve
+ENV PYTHONPATH=/app/src
+ENV PYTHONUNBUFFERED=1
+
+CMD ["celery", "-A", "agentops.workers.celery_app", "worker", "--loglevel=info", "--concurrency=2"]
