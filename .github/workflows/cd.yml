@@ -1,0 +1,73 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+  PROJECT_NAME: agentops
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [api, worker, frontend, mlflow]
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        run: |
+          IMAGE_TAG="${{ github.sha }}"
+          REPO="${{ env.ECR_REGISTRY }}/${{ env.PROJECT_NAME }}-${{ matrix.service }}"
+          docker build -f docker/Dockerfile.${{ matrix.service }} -t ${REPO}:${IMAGE_TAG} -t ${REPO}:latest .
+          docker push ${REPO}:${IMAGE_TAG}
+          docker push ${REPO}:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to ECS
+        run: |
+          for service in api worker frontend mlflow; do
+            aws ecs update-service \
+              --cluster ${{ env.PROJECT_NAME }}-dev \
+              --service ${{ env.PROJECT_NAME }}-dev-${service} \
+              --force-new-deployment \
+              --region ${{ env.AWS_REGION }}
+          done
+
+      - name: Wait for stability
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${{ env.PROJECT_NAME }}-dev \
+            --services ${{ env.PROJECT_NAME }}-dev-api \
+            --region ${{ env.AWS_REGION }}

@@ -1,0 +1,13 @@
+project_name      = "agentops"
+environment       = "prod"
+aws_region        = "us-east-1"
+vpc_cidr          = "10.0.0.0/16"
+azs               = ["us-east-1a", "us-east-1b"]
+db_instance_class = "db.t3.medium"
+db_username       = "agentops"
+db_password       = "CHANGE_ME_IN_PRODUCTION"
+redis_node_type   = "cache.t3.small"
+certificate_arn   = "arn:aws:acm:us-east-1:ACCOUNT:certificate/CERT_ID"
+api_cpu           = 1024
+api_memory        = 2048
+api_desired_count = 2
