@@ -1,0 +1,60 @@
+{
+  "dashboard": {
+    "title": "AgentOps - Cost Tracking",
+    "uid": "agentops-costs",
+    "panels": [
+      {
+        "title": "Total Cost (USD)",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+        "targets": [
+          { "expr": "sum(agentops_cost_usd_total)" }
+        ],
+        "fieldConfig": { "defaults": { "unit": "currencyUSD" } }
+      },
+      {
+        "title": "Total Tokens Used",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+        "targets": [
+          { "expr": "sum(agentops_tokens_total)" }
+        ]
+      },
+      {
+        "title": "Cost by Agent",
+        "type": "bargauge",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "targets": [
+          {
+            "expr": "sum by (agent_name) (agentops_cost_usd_total)",
+            "legendFormat": "{{agent_name}}"
+          }
+        ],
+        "fieldConfig": { "defaults": { "unit": "currencyUSD" } }
+      },
+      {
+        "title": "Token Usage by Agent & Direction",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+        "targets": [
+          {
+            "expr": "rate(agentops_tokens_total[5m])",
+            "legendFormat": "{{agent_name}} {{direction}}"
+          }
+        ]
+      },
+      {
+        "title": "Cost Rate (USD/hour)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "sum(rate(agentops_cost_usd_total[1h])) * 3600",
+            "legendFormat": "Cost/hour"
+          }
+        ],
+        "fieldConfig": { "defaults": { "unit": "currencyUSD" } }
+      }
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "dashboard": {
+    "title": "AgentOps - Agent Performance",
+    "uid": "agentops-performance",
+    "panels": [
+      {
+        "title": "Run Status Distribution",
+        "type": "piechart",
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "agentops_runs_total",
+            "legendFormat": "{{status}}"
+          }
+        ]
+      },
+      {
+        "title": "Active Runs",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+        "targets": [
+          { "expr": "agentops_active_runs" }
+        ]
+      },
+      {
+        "title": "Run Latency (p50/p95/p99)",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "targets": [
+          { "expr": "histogram_quantile(0.5, rate(agentops_run_latency_seconds_bucket[5m]))", "legendFormat": "p50" },
+          { "expr": "histogram_quantile(0.95, rate(agentops_run_latency_seconds_bucket[5m]))", "legendFormat": "p95" },
+          { "expr": "histogram_quantile(0.99, rate(agentops_run_latency_seconds_bucket[5m]))", "legendFormat": "p99" }
+        ]
+      },
+      {
+        "title": "Agent Step Latency by Agent",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(agentops_agent_step_latency_seconds_bucket[5m]))",
+            "legendFormat": "{{agent_name}} p95"
+          }
+        ]
+      },
+      {
+        "title": "Runs per Hour",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "rate(agentops_runs_total[1h])",
+            "legendFormat": "{{status}}"
+          }
+        ]
+      }
+    ]
+  }
+}
